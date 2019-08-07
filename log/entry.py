@@ -9,6 +9,17 @@ class Entry:
         self.version = None
         self.last_modified = None
 
+    def serialize(self):
+        """
+        Serializes into a JSON-able format
+        """
+        return {
+            'file': self.file,
+            'uid': str(self.uid),
+            'version': self.version,
+            'last_modified': str(self.last_modified)
+        }
+
     def update(self):
         """
         Update an already existing log entry
