@@ -29,6 +29,19 @@ Jinja
 
 ## Metadaten
 
+### Webseite allgemein
+Für die Webseite werden folgende Daten gespeichert:
+
+ - URL
+ - Default-Sprache
+ - Mehrsprachigkeit (i18n)
+ - Datumsformat, Zeitzone etc.
+ - Spezielle Build-Parameter etc.
+ 
+_User und Passwörter etc. werden nicht beim Site Generator gespeichert - dieser nimmt nur die erzeugten
+Daten an und erstellt daraus die Webseite (plain HTML + JS).
+Für die Verwaltung der User und der Unterseiten wird ein (Vue.js)-Frontend verwendet._
+
 ### Unterseiten (pages)
 Pages speichern folgende Metadaten:
 
@@ -42,7 +55,7 @@ Pages speichern folgende Metadaten:
  - hidden, private
  - Published, Draft
 
-Die Metadaten werden pro Seite als .json-Datei gespeichert, während die eigentlichen Markdown-Daten als <seite_id>.md gespeichert sind.
+Die Metadaten werden pro Seite als `.json`-Datei gespeichert, während die eigentlichen Markdown-Daten als `<seite_id>.md` gespeichert sind.
 
 ## Build-Prozess
 
@@ -50,14 +63,15 @@ Dem Build-Prozess sollte eigene Middleware (plugins) zwischengeschaltet werden k
 
 ### Ablauf
 
- 1. Einlesen der Seiten (<meta>.json und <seite>.md) sowie der Einstellungen (.json)
+ 1. Einlesen der Seiten (`<meta>.json` und `<seite>.md`) sowie der Einstellungen (`.json`)
  2. Der inkrementelle (intelligente) Builder baut nur Seiten, die sich verändert haben, oder bei denen sich Referenzen geändert haben. Dazu muss er über alle Dateien ein kleines Logbuch führen (json-basiert).
 
+
     {
-	'ueber_uns_3b4f8cc': {
-	  'version': '02',
-	  'last_modified': '207482221'
-	}
+	   'ueber_uns_3b4f8cc': {
+	      'version': '02',
+	      'last_modified': '207482221'
+	   }
     }
 
  3. Laden der verwendeten Templates
