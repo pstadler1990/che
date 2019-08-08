@@ -1,3 +1,7 @@
+from datetime import datetime
+from exceptions import LogEntryNotInLogError
+
+
 class Entry:
 
     def __init__(self, file):
@@ -24,4 +28,8 @@ class Entry:
         """
         Update an already existing log entry
         """
-        pass
+        if not (self.version and self.last_modified):
+            raise LogEntryNotInLogError('Entry may not be in log yet')
+
+        self.version += 1
+        self.last_modified = datetime.now()
