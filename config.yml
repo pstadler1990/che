@@ -1,3 +1,7 @@
 log:
   output_dir: 'store/'
   file_name: 'log.json'
+
+files:
+  meta_types: ['json']
+  page_types: ['md']
