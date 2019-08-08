@@ -1,3 +1,4 @@
+import os
 from log.entry import Entry
 from log.log import Log
 
@@ -5,8 +6,6 @@ if __name__ == '__main__':
 
     log = Log()
 
-    test_entry1 = Entry('about_us')
+    files = log.load_raw_entries(os.path.join('test'))
 
-    log.insert(test_entry1)
-
-    log.write()
+    print(files)
