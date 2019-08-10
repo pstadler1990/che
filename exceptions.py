@@ -24,3 +24,7 @@ class LoaderWrongFileError(Exception):
 
 class LoaderNoSuitableLoaderError(Exception):
     pass
+
+
+class BuildNoBuildFilesError(Exception):
+    pass
