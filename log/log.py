@@ -38,15 +38,28 @@ class Log:
             except json.decoder.JSONDecodeError:
                 self.entries = []
 
-    def load_raw_entries(self, path):
+    @staticmethod
+    def load_raw_entries(path):
         """
         Load a given directory containing meta (json) and page data (md)
-        Returns a list of all found entries
+        Returns a list of all found entries in the form:
+            ...
+            'file': {
+                'meta': {
+                    'contents': ...,
+                    'hash': ...
+                },
+                'page': {
+                    'contents': ...,
+                    'hash': ...
+                }
+            }
+            ...
         """
         if not os.path.isdir(path):
             raise LogEntriesNotADirectoryError('Given path is not a directory')
 
-        changed_files = []
+        found_files = {}
 
         print(colored('Finding meta and page files in...', 'yellow'), path)
         for file in os.listdir(path):
@@ -63,36 +76,57 @@ class Log:
 
                 f_hash = contents_get_hash_md5(raw_contents)
 
-                f_entry = self.find(name=fn)
+                if fn not in found_files:
+                    found_files[fn] = {
+                        'meta': {},
+                        'page': {}
+                    }
 
-                if not f_entry:
-                    # File is not in log yet, insert
-                    if file_is_meta(ext):
-                        print(colored('Found new meta file', 'green'), '[meta]', colored(file, 'magenta'))
-
-                        entry = Entry(fn)
-                        entry.hash = f_hash
-                        self.insert(entry)
-
-                    elif file_is_page(ext):
-                        print('[page]', colored(file, 'blue'))
-
-                        # TODO: Load page contents into dict
-                    else:
-                        # Skipping unrelated files
-                        pass
+                if file_is_meta(ext):
+                    field = 'meta'
+                elif file_is_page(ext):
+                    field = 'page'
                 else:
-                    # File is in log already, compare hashes to find any changes
-                    if f_hash == f_entry.hash:
-                        # Skipping file as there are no changes
-                        print(colored('Skipping file due to no changes', 'magenta'), file)
-                        continue
-                    else:
-                        # There are changes so update the entry and add the file to the change list
-                        # f_entry.update()
-                        # TODO: Once the page content is loaded and hashed, uncomment the entry.update() call
-                        # to eventually update the entry
-                        changed_files.append(fn)
+                    # Skip unrelated files
+                    continue
+
+                found_files[fn][field]['contents'] = raw_contents
+                found_files[fn][field]['hash'] = f_hash
+
+        return found_files, [len(e) == 2 for e in found_files]
+
+    def convert_raw_entries(self, found_entries):
+        """
+        """
+        changed_files = []
+
+        for entry_pair in found_entries:
+
+            f_entry = self.find(name=entry_pair)
+
+            if not f_entry:
+                # Entry is not in the log yet, add it
+                print(colored('Added new file', 'green'), '[meta]', colored(entry_pair, 'magenta'))
+
+                entry = Entry(entry_pair)
+                entry.hash_meta = found_entries[entry_pair]['meta']['hash']
+                entry.hash_file = found_entries[entry_pair]['page']['hash']
+                self.insert(entry)
+            else:
+                # File is in log already, compare hashes to find any changes
+                if f_entry.hash_meta == found_entries[entry_pair]['meta']['hash'] \
+                        and f_entry.hash_file == found_entries[entry_pair]['page']['hash']:
+                    # Skipping file as there are no changes
+                    print(colored('Skipping file due to no changes', 'magenta'), entry_pair)
+                    continue
+                else:
+                    # There are changes so update the entry and add the file to the change list
+                    print(colored('File needs to be rebuild', 'red'), entry_pair)
+                    f_entry.hash_meta = found_entries[entry_pair]['meta']['hash']
+                    f_entry.hash_file = found_entries[entry_pair]['page']['hash']
+                    f_entry.update()
+
+                    changed_files.append(found_entries[entry_pair])
 
         return changed_files
 
