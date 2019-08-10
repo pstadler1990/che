@@ -1,0 +1,171 @@
+import io
+import os
+import json
+import uuid
+import yaml
+from log.entry import Entry
+from datetime import datetime
+from termcolor import colored
+from helpers import file_get_extension, contents_get_hash_md5
+from exceptions import *
+
+config = yaml.safe_load(open('config.yml'))
+
+
+def file_is_meta(ext):
+    return ext in config['files']['meta_types']
+
+
+def file_is_page(ext):
+    return ext in config['files']['page_types']
+
+
+class Log:
+
+    def __init__(self):
+        self.log_file_path = os.path.join(config['log']['output_dir'], config['log']['file_name'])
+
+        if not os.path.exists(config['log']['output_dir']):
+            os.makedirs(config['log']['output_dir'])
+
+        with io.open(self.log_file_path, 'r', encoding='utf-8') as log_file:
+            try:
+                self.entries = []
+                tmp_entries = json.load(log_file)
+                for t in tmp_entries:
+                    entry = Entry(filename=None, field_initializer=t)
+                    self.entries.append(entry)
+            except json.decoder.JSONDecodeError:
+                self.entries = []
+
+    @staticmethod
+    def load_raw_entries(path):
+        """
+        Load a given directory containing meta (json) and page data (md)
+        Returns a list of all found entries in the form:
+            ...
+            'file': {
+                'meta': {
+                    'contents': ...,
+                    'hash': ...
+                },
+                'page': {
+                    'contents': ...,
+                    'hash': ...
+                }
+            }
+            ...
+        """
+        if not os.path.isdir(path):
+            raise LogEntriesNotADirectoryError('Given path is not a directory')
+
+        found_files = {}
+
+        print(colored('Finding meta and page files in...', 'yellow'), path)
+        for file in os.listdir(path):
+            absolute_file_path = os.path.join(path, file)
+
+            if os.path.isfile(absolute_file_path):
+
+                # Finding meta and page files
+                ext, fn = file_get_extension(file, strip_dot=True)
+
+                # Read raw contents
+                with io.open(absolute_file_path, 'rb') as raw_file:
+                    raw_contents = raw_file.read()
+
+                f_hash = contents_get_hash_md5(raw_contents)
+
+                if fn not in found_files:
+                    found_files[fn] = {
+                        'meta': {},
+                        'page': {}
+                    }
+
+                if file_is_meta(ext):
+                    field = 'meta'
+                elif file_is_page(ext):
+                    field = 'page'
+                else:
+                    # Skip unrelated files
+                    continue
+
+                found_files[fn][field]['contents'] = raw_contents
+                found_files[fn][field]['hash'] = f_hash
+
+        return found_files, [len(e) == 2 for e in found_files]
+
+    def convert_raw_entries(self, found_entries):
+        """
+        """
+        changed_files = []
+
+        for entry_pair in found_entries:
+
+            f_entry = self.find(name=entry_pair)
+
+            if not f_entry:
+                # Entry is not in the log yet, add it
+                print(colored('Added new file', 'green'), '[meta]', colored(entry_pair, 'magenta'))
+
+                entry = Entry(entry_pair)
+                entry.hash_meta = found_entries[entry_pair]['meta']['hash']
+                entry.hash_file = found_entries[entry_pair]['page']['hash']
+                self.insert(entry)
+            else:
+                # File is in log already, compare hashes to find any changes
+                if f_entry.hash_meta == found_entries[entry_pair]['meta']['hash'] \
+                        and f_entry.hash_file == found_entries[entry_pair]['page']['hash']:
+                    # Skipping file as there are no changes
+                    print(colored('Skipping file due to no changes', 'magenta'), entry_pair)
+                    continue
+                else:
+                    # There are changes so update the entry and add the file to the change list
+                    print(colored('File needs to be rebuild', 'red'), entry_pair)
+                    f_entry.hash_meta = found_entries[entry_pair]['meta']['hash']
+                    f_entry.hash_file = found_entries[entry_pair]['page']['hash']
+                    f_entry.update()
+
+                    changed_files.append(found_entries[entry_pair])
+
+        return changed_files
+
+    def insert(self, entry, write_meta=True):
+        """
+        Insert a new loggable object to the log
+        For every new entry a UUID is generated
+        """
+        if not entry.file:
+            raise LogNoLoggableEntryError('Given entry is a non-loggable object')
+
+        if [e for e in self.entries if e.file == entry.file]:
+            raise LogEntryAlreadyInLogError('Given entry is already in the log')
+
+        entry.last_modified = datetime.now()
+        if not entry.version:
+            entry.version = 1
+
+        entry.uid = uuid.uuid4()
+        self.entries.append(entry)
+
+        if write_meta:
+            # TODO: Write newly created meta information to the meta file
+            pass
+
+    def find(self, name, uid=None):
+        """
+        Returns the entry for given uid
+        """
+        return next(filter(lambda e: e.uid == uid, self.entries), None) if uid else next(filter(lambda e: e.file == name, self.entries), None)
+
+    def write(self):
+        """
+        Write all entries (created, existing or modified) to the log file
+        """
+        with io.open(self.log_file_path, 'w', encoding='utf-8') as log_file:
+            try:
+                if log_file.writable():
+                    json.dump([e.serialize() for e in self.entries], log_file, ensure_ascii=False)
+
+            except ValueError:
+                raise LogNotWriteableError('Log is not writable')
