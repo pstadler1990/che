@@ -11,13 +11,15 @@ class Entry:
             self.uid = field_initializer['uid']
             self.version = field_initializer['version']
             self.last_modified = field_initializer['last_modified']
-            self.hash = field_initializer['hash']
+            self.hash_meta = field_initializer['hash_meta']
+            self.hash_file = field_initializer['hash_file']
         else:
             self.file = filename
             self.uid = None
             self.version = None
             self.last_modified = None
-            self.hash = None
+            self.hash_meta = None
+            self.hash_file = None
 
     def serialize(self):
         """
@@ -28,7 +30,8 @@ class Entry:
             'uid': str(self.uid),
             'version': self.version,
             'last_modified': str(self.last_modified),
-            'hash': self.hash
+            'hash_meta': self.hash_meta,
+            'hash_file': self.hash_file
         }
 
     def update(self):
