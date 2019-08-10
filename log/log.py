@@ -92,6 +92,7 @@ class Log:
 
                 found_files[fn][field]['contents'] = raw_contents
                 found_files[fn][field]['hash'] = f_hash
+                found_files[fn][field]['type'] = ext
 
         return found_files, [len(e) == 2 for e in found_files]
 
