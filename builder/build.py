@@ -1,12 +1,12 @@
 import io
 import os
 import yaml
-from exceptions import BuildNoBuildFilesError, LoaderNoSuitableLoaderError
+from exceptions import BuildNoBuildFilesError
 from nlp import nlp_process
 from builder.template import render_template
 from termcolor import colored
 from helpers import safe_create_dir
-
+import htmlmin
 
 config = yaml.safe_load(open('config.yml'))
 
@@ -63,9 +63,6 @@ class Builder:
         Generates an internal representation of the website's navigation of all passed files
         Call this method before build() to include a nav within the website
         """
-        if not config['templates']['build_nav']:
-            return
-
         print(colored('Building navigation', 'grey'))
 
         self.nav_entries = []
@@ -77,7 +74,7 @@ class Builder:
                 'url': '{0}{1}.{2}'.format('/' if use_absolute_links else '', page_obj['meta']['loaded']['slug'], config['output']['file_format'])
             })
 
-    def build(self):
+    def build(self, minify_html=True):
         """
         Render output using the Jinja template engine
         """
@@ -92,6 +89,9 @@ class Builder:
             print(colored('Generated output file', 'green'), page_obj['meta']['loaded']['slug'])
 
             output_path = os.path.join(config['output']['output_dir'], '{0}.{1}'.format(page_obj['meta']['loaded']['slug'], config['output']['file_format']))
+
+            if minify_html:
+                output_html = htmlmin.minify(output_html, remove_comments=True, remove_empty_space=True)
 
             safe_create_dir(output_path)
             with io.open(output_path, 'w+', encoding='utf-8') as output_file:
