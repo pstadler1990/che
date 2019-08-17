@@ -38,7 +38,6 @@ class Entry:
         """
         Update an already existing log entry
         """
-        # TODO: Modify update method as its pretty useless atm!
         if not (self.version and self.last_modified):
             raise LogEntryNotInLogError('Entry may not be in log yet')
 

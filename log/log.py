@@ -147,7 +147,7 @@ class Log:
 
         return changed_files, needs_complete_rebuild
 
-    def insert(self, entry, write_meta=True):
+    def insert(self, entry):
         """
         Insert a new loggable object to the log
         For every new entry a UUID is generated
@@ -164,10 +164,6 @@ class Log:
 
         entry.uid = uuid.uuid4()
         self.entries.append(entry)
-
-        if write_meta:
-            # TODO: Write newly created meta information to the meta file
-            pass
 
     def find(self, name, uid=None):
         """

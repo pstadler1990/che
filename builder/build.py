@@ -66,7 +66,7 @@ class Builder:
         if not config['templates']['build_nav']:
             return
 
-        print(colored('Building navigation from files', 'grey'), all_files)
+        print(colored('Building navigation', 'grey'))
 
         self.nav_entries = []
         for entry_pair in all_files:
@@ -96,3 +96,4 @@ class Builder:
             safe_create_dir(output_path)
             with io.open(output_path, 'w+', encoding='utf-8') as output_file:
                 output_file.write(output_html)
+
