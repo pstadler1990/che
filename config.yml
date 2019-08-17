@@ -8,13 +8,14 @@ files:
 
 templates:
   path: 'test/templates'
+  build_nav: true
 
 output:
   file_format: 'html'
   output_dir: 'dist/'
 
 processing:
-  use_nltk: 'True'
+  use_nltk: true
   min_word_length: 2
   keyword_extraction: 'True'
   summary_generation: 'True'
