@@ -5,3 +5,16 @@ log:
 files:
   meta_types: ['json']
   page_types: ['md']
+
+templates:
+  path: 'test/templates'
+
+output:
+  file_format: 'html'
+  output_dir: 'dist/'
+
+processing:
+  use_nltk: 'True'
+  min_word_length: 2
+  keyword_extraction: 'True'
+  summary_generation: 'True'
