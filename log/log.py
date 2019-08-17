@@ -92,13 +92,16 @@ class Log:
 
                 found_files[fn][field]['contents'] = raw_contents
                 found_files[fn][field]['hash'] = f_hash
+                found_files[fn][field]['type'] = ext
 
         return found_files, [len(e) == 2 for e in found_files]
 
     def convert_raw_entries(self, found_entries):
         """
+        Returns a dict of changed files (including meta and page information) of changed files
+        by comparing the files' hashes with the ones stored in the log
         """
-        changed_files = []
+        changed_files = {}
 
         for entry_pair in found_entries:
 
@@ -126,7 +129,7 @@ class Log:
                     f_entry.hash_file = found_entries[entry_pair]['page']['hash']
                     f_entry.update()
 
-                    changed_files.append(found_entries[entry_pair])
+                    changed_files[entry_pair] = found_entries[entry_pair]
 
         return changed_files
 

@@ -12,3 +12,16 @@ class AMetaLoader(ABC):
     @abstractmethod
     def read(self, file):
         pass
+
+
+class APageLoader(ABC):
+    """
+    Abstract class for implementing specific page loaders
+    Each page loader could expand che's abilities to load multiple page file formats
+    """
+    def __init__(self):
+        pass
+
+    @abstractmethod
+    def read(self, file):
+        pass
