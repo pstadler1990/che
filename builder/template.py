@@ -14,8 +14,8 @@ def _load_template(template):
     return env.get_template(template)
 
 
-def render_template(template, var_dict):
+def render_template(template, **kwargs):
     """
     Returns the rendered html output for given template (path/file) and a passed page dict
     """
-    return _load_template(template).render(page=var_dict)
+    return _load_template(template).render(kwargs)
