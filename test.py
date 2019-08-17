@@ -15,11 +15,13 @@ if __name__ == '__main__':
 
     print(files)
 
-    changed_files = log.convert_raw_entries(files)
+    changed_files, needs_rebuild = log.convert_raw_entries(files)
 
-    builder = Builder(changed_files)
+    builder = Builder(changed_files if not needs_rebuild else files)
     builder.prepare()
     builder.process_text_auto()
+
+    builder.build_nav(files, use_absolute_links=False)
 
     # Render html to Jinja template
     builder.build()
