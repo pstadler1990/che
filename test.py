@@ -15,9 +15,13 @@ if __name__ == '__main__':
 
     print(files)
 
-    log.convert_raw_entries(files)
+    changed_files = log.convert_raw_entries(files)
 
-    builder = Builder(files)
+    builder = Builder(changed_files)
     builder.prepare()
+    builder.process_text_auto()
+
+    # Render html to Jinja template
+    builder.build()
 
     log.write()
