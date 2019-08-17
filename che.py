@@ -1,10 +1,20 @@
 import os
+import sys
 import time
-from termcolor import colored
+import yaml
+import argparse
 from log.log import Log
+from termcolor import colored
 from builder.build import Builder
 
+config = yaml.safe_load(open('config.yml'))
+
+argparser = argparse.ArgumentParser()
+argparser.add_argument('--force_rebuild', help='Force rebuild of all files, despite of any changes', action='store_true')
+
 if __name__ == '__main__':
+    # Read command line options
+    args = argparser.parse_args()
 
     build_time_start = time.time()
 
@@ -20,17 +30,20 @@ if __name__ == '__main__':
         print(colored('BUILD ERROR', 'red'), 'Build time: {0}'.format(time.time() - build_time_start))
         exit()
 
-    changed_files, needs_rebuild = log.convert_raw_entries(files)
+    changed_files, needs_rebuild_from_files = log.convert_raw_entries(files)
+
+    # Force rebuild either by files or by command line option --force-rebuild
+    needs_rebuild = args.force_rebuild or needs_rebuild_from_files
 
     builder = Builder(changed_files if not needs_rebuild else files)
     builder.prepare()
     builder.process_text_auto()
 
-    if changed_files:
+    if config['templates']['build_nav'] and (changed_files or needs_rebuild):
         builder.build_nav(files, use_absolute_links=False)
 
     # Render html to Jinja template
-    builder.build()
+    builder.build(minify_html=config['output']['minify_html'])
 
     # Update log file after the successful build
     log.write()
