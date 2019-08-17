@@ -16,6 +16,10 @@ if __name__ == '__main__':
     # this would return false for ok if any file is not a pair (= missing either a meta or a page file)
     print('File integrity: ', colored('OK ', 'green') if ok else colored('Error!', 'red'))
 
+    if not ok:
+        print(colored('BUILD ERROR', 'red'), 'Build time: {0}'.format(time.time() - build_time_start))
+        exit()
+
     changed_files, needs_rebuild = log.convert_raw_entries(files)
 
     builder = Builder(changed_files if not needs_rebuild else files)
