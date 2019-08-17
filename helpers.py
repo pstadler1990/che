@@ -1,6 +1,7 @@
 import io
 import os
 import hashlib
+import errno
 
 
 def file_get_extension(file, strip_dot=False):
@@ -27,3 +28,9 @@ def contents_get_hash_md5(contents):
     md5 = hashlib.md5()
     md5.update(contents)
     return md5.hexdigest()
+
+
+def safe_create_dir(file):
+    dir_name = os.path.dirname(file)
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name, exist_ok=True)
