@@ -53,6 +53,9 @@ class Builder:
 
                 self.contents[entry_pair][entry] = loader.read(self.files[entry_pair][entry]['contents'])
 
+        # Filter out all entries that are not in published state (i.e. draft)
+        self.contents = {k: v for k, v in self.contents.items() if v['meta']['status'] == 'published'}
+
         print('Preparation finished')
 
     def process_text_auto(self):
