@@ -13,11 +13,11 @@ from exceptions import *
 config = yaml.safe_load(open('config.yml'))
 
 
-def file_is_meta(ext):
+def _file_is_meta(ext):
     return ext in config['files']['meta_types']
 
 
-def file_is_page(ext):
+def _file_is_page(ext):
     return ext in config['files']['page_types']
 
 
@@ -83,9 +83,9 @@ class Log:
                         'page': {}
                     }
 
-                if file_is_meta(ext):
+                if _file_is_meta(ext):
                     field = 'meta'
-                elif file_is_page(ext):
+                elif _file_is_page(ext):
                     field = 'page'
                 else:
                     # Skip unrelated files
