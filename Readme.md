@@ -54,6 +54,7 @@ Pages speichern folgende Metadaten:
  - template (Verweis auf Template-ID oder File)
  - hidden, private
  - Published, Draft
+ - use_nlp (use natural language processing, z.B. autom. Keyword- und Satzextrahierung)
 
 Die Metadaten werden pro Seite als `.json`-Datei gespeichert, während die eigentlichen Markdown-Daten als `<seite_id>.md` gespeichert sind.
 
