@@ -75,6 +75,15 @@ class Log:
                 with io.open(absolute_file_path, 'rb') as raw_file:
                     raw_contents = raw_file.read()
 
+                if _file_is_meta(ext):
+                    field = 'meta'
+                elif _file_is_page(ext):
+                    field = 'page'
+                else:
+                    # Skip unrelated files
+                    # TODO: Add other cases for images, stylesheets etc. (assets)
+                    continue
+
                 f_hash = contents_get_hash_md5(raw_contents)
 
                 if fn not in found_files:
@@ -82,14 +91,6 @@ class Log:
                         'meta': {},
                         'page': {}
                     }
-
-                if _file_is_meta(ext):
-                    field = 'meta'
-                elif _file_is_page(ext):
-                    field = 'page'
-                else:
-                    # Skip unrelated files
-                    continue
 
                 # Find suitable loaders for meta and page contents
                 loader = find_meta_loader_for_ext(ext)()
