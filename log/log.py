@@ -7,6 +7,7 @@ from log.entry import Entry
 from datetime import datetime
 from termcolor import colored
 from helpers import file_get_extension, contents_get_hash_md5
+from loader.loaders import find_meta_loader_for_ext
 from exceptions import *
 
 config = yaml.safe_load(open('config.yml'))
@@ -90,6 +91,12 @@ class Log:
                     # Skip unrelated files
                     continue
 
+                # Find suitable loaders for meta and page contents
+                loader = find_meta_loader_for_ext(ext)()
+                if not loader:
+                    raise LoaderNoSuitableLoaderError('No suitable loader found for this type')
+
+                found_files[fn][field]['loaded'] = loader.read(raw_contents)
                 found_files[fn][field]['contents'] = raw_contents
                 found_files[fn][field]['hash'] = f_hash
                 found_files[fn][field]['type'] = ext
@@ -102,6 +109,7 @@ class Log:
         by comparing the files' hashes with the ones stored in the log
         """
         changed_files = {}
+        needs_complete_rebuild = False
 
         for entry_pair in found_entries:
 
@@ -115,6 +123,12 @@ class Log:
                 entry.hash_meta = found_entries[entry_pair]['meta']['hash']
                 entry.hash_file = found_entries[entry_pair]['page']['hash']
                 self.insert(entry)
+
+                # If we add a new file and build_nav is enabled, we need to rebuild every page, as we
+                # include the nav to all the files
+                if config['templates']['build_nav']:
+                    needs_complete_rebuild = True
+                    print(colored('Need to rebuild every page due to build_nav option', 'red'))
             else:
                 # File is in log already, compare hashes to find any changes
                 if f_entry.hash_meta == found_entries[entry_pair]['meta']['hash'] \
@@ -131,7 +145,7 @@ class Log:
 
                     changed_files[entry_pair] = found_entries[entry_pair]
 
-        return changed_files
+        return changed_files, needs_complete_rebuild
 
     def insert(self, entry, write_meta=True):
         """
