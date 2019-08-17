@@ -4,15 +4,14 @@ Grundidee: Vue.js Backend (Admin- / Redaktionsbereich) mit Login per JWT.
 Dort werden die Seiten erstellt bzw. bearbeitet und die Einstellungen für die Webseite geändert.
 Diese Daten werden als Dateien (flat cms) abgelegt (JSON-basiert).
 
-Anschließend (und bei jeder Änderung) wird ein (zB in Python oder Go) geschriebenes Build-Skript aufgerufen (inkrementell), welches dann aus den JSON-Daten und den festgelegten HTML-Templates statische Webseiten mit intelligenter Verlinkung erzeugt.
+Anschließend (und bei jeder Änderung) wird `che` aufgerufen, ein in Python geschriebenes Build-Skript (inkrementell), welches dann aus den JSON-Daten und den festgelegten HTML-Templates statische Webseiten mit intelligenter Verlinkung erzeugt.
 
 Jede Seite erhält dabei eine eindeutige ID, welche in den Unterseiten referenziert werden kann (Verlinkungen). Bei einer Änderung des Seitentitels etc. wird aber die Referenz nicht aufgelöst, aber die referenzierenden Seiten müssen durch den intelligenten Builder neu gebaut werden (Klartext-URLs in Links etc).
 
 ## Templating
 Für jede Webseite können beliebig viele Templates angelegt werden. Jeder Unterseite kann dann ein Template zugewiesen werden.
+Die Templates basieren auf `Jinja2`.
 
-Für Python bietet sich folgende Library an:
-Jinja
 
 ## Wichtige Features
 
