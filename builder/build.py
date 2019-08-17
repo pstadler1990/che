@@ -2,7 +2,6 @@ import io
 import os
 import yaml
 from exceptions import BuildNoBuildFilesError, LoaderNoSuitableLoaderError
-from loader.loaders import find_meta_loader_for_ext
 from nlp import nlp_process
 from builder.template import render_template
 from termcolor import colored
@@ -36,25 +35,15 @@ class Builder:
             raise BuildNoBuildFilesError('No build files given')
         self.files = build_files
         self.contents = {}
+        self.nav_entries = []
 
     def prepare(self):
         """
         Takes all [meta] and [page] entries from the log-convert process (changed_files)
         and uses a suitable loader from /loader for [meta] and [page] to load into a dict (meta) and html (page)
         """
-        self.contents = {}
-        for entry_pair in self.files:
-            self.contents[entry_pair] = {}
-            # Find suitable loaders for meta and page contents
-            for entry in self.files[entry_pair]:
-                loader = find_meta_loader_for_ext(self.files[entry_pair][entry]['type'])()
-                if not loader:
-                    raise LoaderNoSuitableLoaderError('No suitable loader found for this type')
-
-                self.contents[entry_pair][entry] = loader.read(self.files[entry_pair][entry]['contents'])
-
         # Filter out all entries that are not in published state (i.e. draft)
-        self.contents = {k: v for k, v in self.contents.items() if v['meta']['status'] == 'published'}
+        self.contents = {k: v for k, v in self.files.items() if v['meta']['loaded']['status'] == 'published'}
 
         print('Preparation finished')
 
@@ -69,6 +58,25 @@ class Builder:
             keywords, summary = nlp_process(self.contents[entry_pair]['page'])
             print(keywords, summary)
 
+    def build_nav(self, all_files, use_absolute_links=True):
+        """
+        Generates an internal representation of the website's navigation of all passed files
+        Call this method before build() to include a nav within the website
+        """
+        if not config['templates']['build_nav']:
+            return
+
+        print(colored('Building navigation from files', 'grey'), all_files)
+
+        self.nav_entries = []
+        for entry_pair in all_files:
+            page_obj = all_files[entry_pair]
+
+            self.nav_entries.append({
+                'title': page_obj['meta']['loaded']['title'],
+                'url': '{0}{1}.{2}'.format('/' if use_absolute_links else '', page_obj['meta']['loaded']['slug'], config['output']['file_format'])
+            })
+
     def build(self):
         """
         Render output using the Jinja template engine
@@ -76,14 +84,14 @@ class Builder:
         for page in self.contents:
             page_obj = self.contents[page]
 
-            output_html = render_template(page_obj['meta']['template'], {
-                'title': page_obj['meta']['title'],
-                'content': page_obj['page']
-            })
+            output_html = render_template(page_obj['meta']['loaded']['template'], page={
+                'title': page_obj['meta']['loaded']['title'],
+                'content': page_obj['page']['loaded']
+            }, nav=self.nav_entries)
 
-            print(colored('Generated output file', 'green'), page)
+            print(colored('Generated output file', 'green'), page_obj['meta']['loaded']['slug'])
 
-            output_path = os.path.join(config['output']['output_dir'], '{0}.{1}'.format(page, config['output']['file_format']))
+            output_path = os.path.join(config['output']['output_dir'], '{0}.{1}'.format(page_obj['meta']['loaded']['slug'], config['output']['file_format']))
 
             safe_create_dir(output_path)
             with io.open(output_path, 'w+', encoding='utf-8') as output_file:
