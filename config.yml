@@ -13,6 +13,7 @@ templates:
 output:
   file_format: 'html'
   output_dir: 'dist/'
+  minify_html: true
 
 processing:
   use_nltk: true
