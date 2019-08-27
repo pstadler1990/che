@@ -96,4 +96,3 @@ class Builder:
             safe_create_dir(output_path)
             with io.open(output_path, 'w+', encoding='utf-8') as output_file:
                 output_file.write(output_html)
-

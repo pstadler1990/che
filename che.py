@@ -1,5 +1,4 @@
 import os
-import sys
 import time
 import yaml
 import argparse
@@ -39,7 +38,7 @@ if __name__ == '__main__':
     builder.prepare()
     builder.process_text_auto()
 
-    if config['templates']['build_nav'] and (changed_files or needs_rebuild):
+    if config['templates']['build_nav'] and needs_rebuild:
         builder.build_nav(files, use_absolute_links=False)
 
     # Render html to Jinja template
@@ -48,6 +47,4 @@ if __name__ == '__main__':
     # Update log file after the successful build
     log.write()
 
-    print(colored('BUILD SUCCESSFUL', 'green'), 'Build time: {0}'.format(time.time() - build_time_start))
-
-
+    print(colored('BUILD SUCCESSFUL', 'green', 'on_grey'), ' -> Build time: {0}'.format(time.time() - build_time_start))

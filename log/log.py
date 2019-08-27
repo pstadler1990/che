@@ -22,7 +22,11 @@ def _file_is_page(ext):
 
 
 class Log:
-
+    """
+    Log class for keeping files sync
+    Every new supported file (meta and page) is appended to the log.
+    We only store some meta information and the file's (md5) hash for file integrity checks
+    """
     def __init__(self):
         self.log_file_path = os.path.join(config['log']['output_dir'], config['log']['file_name'])
 
@@ -139,6 +143,9 @@ class Log:
                     continue
                 else:
                     # There are changes so update the entry and add the file to the change list
+                    if f_entry.hash_meta != found_entries[entry_pair]['meta']['hash']:
+                        needs_complete_rebuild = True
+
                     print(colored('File needs to be rebuild', 'red'), entry_pair)
                     f_entry.hash_meta = found_entries[entry_pair]['meta']['hash']
                     f_entry.hash_file = found_entries[entry_pair]['page']['hash']
