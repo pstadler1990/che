@@ -5,17 +5,24 @@ import argparse
 from log.log import Log
 from termcolor import colored
 from builder.build import Builder
+from plugin import PluginHandler
+
 
 config = yaml.safe_load(open('config.yml'))
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('--force_rebuild', help='Force rebuild of all files, despite of any changes', action='store_true')
 
+installed_plugins = []
+
 if __name__ == '__main__':
     # Read command line options
     args = argparser.parse_args()
 
     build_time_start = time.time()
+
+    plugin_handler = PluginHandler(config['plugins']['path'])
+    plugin_handler.install_plugins()
 
     log = Log()
 

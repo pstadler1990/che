@@ -20,3 +20,6 @@ processing:
   min_word_length: 2
   keyword_extraction: 'True'
   summary_generation: 'True'
+
+plugins:
+  path: 'plugins/'
