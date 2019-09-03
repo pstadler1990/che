@@ -6,7 +6,7 @@ import yaml
 from log.entry import Entry
 from datetime import datetime
 from termcolor import colored
-from helpers import file_get_extension, contents_get_hash_md5
+from helpers import file_get_extension, contents_get_hash_md5, safe_create_dir
 from loader.loaders import find_meta_loader_for_ext
 from exceptions import *
 
@@ -30,8 +30,7 @@ class Log:
     def __init__(self):
         self.log_file_path = os.path.join(config['log']['output_dir'], config['log']['file_name'])
 
-        if not os.path.exists(config['log']['output_dir']):
-            os.makedirs(config['log']['output_dir'])
+        safe_create_dir(config['log']['output_dir'])
 
         with io.open(self.log_file_path, 'r', encoding='utf-8') as log_file:
             try:
@@ -96,15 +95,18 @@ class Log:
                         'page': {}
                     }
 
+                found_files[fn][field]['type'] = ext
+                found_files[fn][field]['contents'] = raw_contents
+
+                # TODO: Call beforeLoad() hook
+
                 # Find suitable loaders for meta and page contents
                 loader = find_meta_loader_for_ext(ext)()
                 if not loader:
                     raise LoaderNoSuitableLoaderError('No suitable loader found for this type')
 
                 found_files[fn][field]['loaded'] = loader.read(raw_contents)
-                found_files[fn][field]['contents'] = raw_contents
                 found_files[fn][field]['hash'] = f_hash
-                found_files[fn][field]['type'] = ext
 
         return found_files, [len(e) == 2 for e in found_files]
 
