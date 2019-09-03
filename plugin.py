@@ -19,7 +19,7 @@ class Plugin(ABC):
         pass
 
     @abstractmethod
-    def before_load(self, metas, pages):
+    def before_load(self, raw_content):
         """
         Gets called before the actual loading of the [meta] and [page] raw files through a suitable loader.
         Attach plugin code here, i.e. if you want to implement custom short codes
@@ -43,6 +43,7 @@ class PluginHandler:
         self.found_modules = []
         self.installed_plugins = []
 
+        # Find plugins right away
         self._find_plugins()
 
     def _find_plugins(self):
@@ -73,3 +74,8 @@ class PluginHandler:
                 print(colored('Plugin loaded: ', 'green'), plugin['module'])
             except AttributeError:
                 print(colored('Plugin loading error: ', 'red'), plugin['module'])
+
+    def before_load(self, *payload):
+        for plugin in self.installed_plugins:
+            plugin.before_load(*payload)
+

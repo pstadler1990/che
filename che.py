@@ -6,7 +6,7 @@ from log.log import Log
 from termcolor import colored
 from builder.build import Builder
 from plugin import PluginHandler
-
+from hooks import add_subscriber, HOOK_BEFORE_LOAD
 
 config = yaml.safe_load(open('config.yml'))
 
@@ -25,6 +25,8 @@ if __name__ == '__main__':
     plugin_handler.install_plugins()
 
     log = Log()
+
+    add_subscriber(plugin_handler, HOOK_BEFORE_LOAD)
 
     files, ok = log.load_raw_entries(os.path.join('test'))
     # TODO: path to the files should be a command line argument with default in config
