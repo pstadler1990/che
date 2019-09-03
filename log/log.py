@@ -3,6 +3,7 @@ import os
 import json
 import uuid
 import yaml
+from hooks import emit_hook, HOOK_BEFORE_LOAD
 from log.entry import Entry
 from datetime import datetime
 from termcolor import colored
@@ -98,7 +99,8 @@ class Log:
                 found_files[fn][field]['type'] = ext
                 found_files[fn][field]['contents'] = raw_contents
 
-                # TODO: Call beforeLoad() hook
+                # Call before_load hooks on each file before the actual loader loads the file
+                emit_hook(HOOK_BEFORE_LOAD, found_files[fn][field])
 
                 # Find suitable loaders for meta and page contents
                 loader = find_meta_loader_for_ext(ext)()
