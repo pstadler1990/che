@@ -1,7 +1,6 @@
 import io
 import os
 import hashlib
-import errno
 
 
 def file_get_extension(file, strip_dot=False):
@@ -34,3 +33,4 @@ def safe_create_dir(file):
     dir_name = os.path.dirname(file)
     if not os.path.exists(dir_name):
         os.makedirs(dir_name, exist_ok=True)
+
