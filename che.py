@@ -5,11 +5,15 @@ import argparse
 from log.log import Log
 from termcolor import colored
 from builder.build import Builder
+from plugin import PluginHandler
+from hooks import add_subscriber, HOOK_BEFORE_LOAD
 
 config = yaml.safe_load(open('config.yml'))
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('--force_rebuild', help='Force rebuild of all files, despite of any changes', action='store_true')
+
+installed_plugins = []
 
 if __name__ == '__main__':
     # Read command line options
@@ -17,7 +21,12 @@ if __name__ == '__main__':
 
     build_time_start = time.time()
 
+    plugin_handler = PluginHandler(config['plugins']['path'])
+    plugin_handler.install_plugins()
+
     log = Log()
+
+    add_subscriber(plugin_handler, HOOK_BEFORE_LOAD)
 
     files, ok = log.load_raw_entries(os.path.join('test'))
     # TODO: path to the files should be a command line argument with default in config
