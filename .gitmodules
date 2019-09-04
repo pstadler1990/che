@@ -1,0 +1,3 @@
+[submodule "plugins/che_gallery"]
+	path = plugins/che_gallery
+	url = https://github.com/pstadler1990/che_gallery.git
