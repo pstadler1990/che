@@ -5,6 +5,8 @@ from abc import ABC, abstractmethod
 import pkgutil
 from setuptools import find_packages
 from termcolor import colored
+from builder.template import add_template_path
+from hooks import HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
 
 
 class Plugin(ABC):
@@ -12,11 +14,15 @@ class Plugin(ABC):
     This abstract meta class is a blueprint for creating own plugins.
     You can override it's abstract methods, i.e. attach your plugin to hooks / callbacks.
     """
+    @abstractmethod
+    def install(self):
+        pass
+
     def __init__(self):
         """
         Initialize plugin here
         """
-        pass
+        self.install()
 
     @abstractmethod
     def before_load(self, raw_content):
@@ -27,7 +33,7 @@ class Plugin(ABC):
         pass
 
     @abstractmethod
-    def on_raw_loaded(self):
+    def after_load(self, loaded_content):
         pass
 
 
@@ -75,7 +81,27 @@ class PluginHandler:
             except AttributeError:
                 print(colored('Plugin loading error: ', 'red'), plugin['module'])
 
-    def before_load(self, *payload):
-        for plugin in self.installed_plugins:
-            plugin.before_load(*payload)
+    @staticmethod
+    def install_template_path(path):
+        """
+        Install the specified path to the jinja templates list
+        """
+        add_template_path(path)
 
+    def _exec_hook(self, hook, *payload):
+        initial_payload = payload
+        for plugin in self.installed_plugins:
+            initial_payload = getattr(plugin, hook)(*initial_payload)
+        return initial_payload
+
+    def before_load(self, *payload):
+        """
+        Execute before_load hook on all installed plugins
+        """
+        return self._exec_hook(HOOK_BEFORE_LOAD, *payload)
+
+    def after_load(self, *payload):
+        """
+        Execute after_load hook on all installed plugins
+        """
+        return self._exec_hook(HOOK_AFTER_LOAD, *payload)

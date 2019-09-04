@@ -3,7 +3,7 @@ import os
 import json
 import uuid
 import yaml
-from hooks import emit_hook, HOOK_BEFORE_LOAD
+from hooks import emit_hook, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
 from log.entry import Entry
 from datetime import datetime
 from termcolor import colored
@@ -109,6 +109,9 @@ class Log:
 
                 found_files[fn][field]['loaded'] = loader.read(raw_contents)
                 found_files[fn][field]['hash'] = f_hash
+
+                # Call before_load hooks on each file before the actual loader loads the file
+                found_files[fn][field] = emit_hook(HOOK_AFTER_LOAD, found_files[fn][field])
 
         return found_files, [len(e) == 2 for e in found_files]
 
