@@ -1,12 +1,12 @@
 import io
 import os
-import yaml
-from exceptions import BuildNoBuildFilesError
-from nlp import nlp_process
-from builder.template import render_template
-from termcolor import colored
-from helpers import safe_create_dir
 import htmlmin
+import yaml
+from termcolor import colored
+from builder.template import render_template
+from exceptions import BuildNoBuildFilesError
+from helpers import safe_create_dir
+from nlp import nlp_process
 
 config = yaml.safe_load(open('config.yml'))
 
