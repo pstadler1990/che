@@ -100,7 +100,9 @@ class Log:
                 found_files[fn][field]['contents'] = raw_contents
 
                 # Call before_load hooks on each file before the actual loader loads the file
-                emit_hook(HOOK_BEFORE_LOAD, found_files[fn][field])
+                # This hook is fired, as soon as we've collected both, meta and page information
+                if len(found_files[fn]['meta']) and len(found_files[fn]['page']):
+                    found_files[fn] = emit_hook(HOOK_BEFORE_LOAD, found_files[fn])
 
                 # Find suitable loaders for meta and page contents
                 loader = find_meta_loader_for_ext(ext)()
@@ -110,8 +112,10 @@ class Log:
                 found_files[fn][field]['loaded'] = loader.read(raw_contents)
                 found_files[fn][field]['hash'] = f_hash
 
-                # Call before_load hooks on each file before the actual loader loads the file
-                found_files[fn][field] = emit_hook(HOOK_AFTER_LOAD, found_files[fn][field])
+                # Call after_load hooks on each file after the actual loader has loaded the file
+                # This hook is fired, as soon as we've collected both, meta and page information
+                if len(found_files[fn]['meta']) and len(found_files[fn]['page']):
+                    found_files[fn] = emit_hook(HOOK_AFTER_LOAD, found_files[fn])
 
         return found_files, [len(e) == 2 for e in found_files]
 
