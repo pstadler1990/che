@@ -1,5 +1,6 @@
 hook_subscribers = {}
 HOOK_BEFORE_LOAD = 'before_load'
+HOOK_AFTER_LOAD = 'after_load'
 
 
 def add_subscriber(subscriber, *hooks):
@@ -10,5 +11,10 @@ def add_subscriber(subscriber, *hooks):
 
 
 def emit_hook(hook, *payload):
-    for subscriber in hook_subscribers[hook]:
-        getattr(subscriber, hook)(payload[0])
+    initial_payload = payload[0]
+    try:
+        for subscriber in hook_subscribers[hook]:
+            initial_payload = getattr(subscriber, hook)(initial_payload)
+        return initial_payload
+    except KeyError:
+        pass
