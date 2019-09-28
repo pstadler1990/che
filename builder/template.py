@@ -36,7 +36,7 @@ def render_template(template, **kwargs):
     """
     if 'page' not in kwargs:
         kwargs['page'] = None
-    if 'title' not in kwargs:
+    if 'nav' not in kwargs:
         kwargs['nav'] = []
     return _load_template(template).render(kwargs)
 
