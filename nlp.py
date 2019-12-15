@@ -1,11 +1,10 @@
-import yaml
 import nltk
+import yaml
 from bs4 import BeautifulSoup
 from langdetect import detect
 from nltk.corpus import stopwords
-from textblob import TextBlob
 from nltk.tokenize import RegexpTokenizer
-
+from textblob import TextBlob
 
 config = yaml.safe_load(open('config.yml'))
 tokenizer = RegexpTokenizer(r'\w+')

@@ -1,6 +1,5 @@
 import yaml
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-from jinja2 import BaseLoader
+from jinja2 import Environment, FileSystemLoader, select_autoescape, BaseLoader
 
 config = yaml.safe_load(open('config.yml'))
 

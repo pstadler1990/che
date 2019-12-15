@@ -14,7 +14,7 @@ available_loaders = [
 ]
 
 
-def find_meta_loader_for_ext(ext):
+def find_loader_for_ext(ext):
     try:
         return next(filter(lambda l: ext in l['ext'], available_loaders))['loader']
     except StopIteration:

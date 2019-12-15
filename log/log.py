@@ -8,7 +8,7 @@ from log.entry import Entry
 from datetime import datetime
 from termcolor import colored
 from helpers import file_get_extension, contents_get_hash_md5, safe_create_dir
-from loader.loaders import find_meta_loader_for_ext
+from loader.loaders import find_loader_for_ext
 from exceptions import *
 
 config = yaml.safe_load(open('config.yml'))
@@ -105,7 +105,7 @@ class Log:
                     found_files[fn] = emit_hook(HOOK_BEFORE_LOAD, found_files[fn])
 
                 # Find suitable loaders for meta and page contents
-                loader = find_meta_loader_for_ext(ext)()
+                loader = find_loader_for_ext(ext)()
                 if not loader:
                     raise LoaderNoSuitableLoaderError('No suitable loader found for this type')
 
