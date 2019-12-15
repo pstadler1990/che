@@ -7,11 +7,13 @@ from termcolor import colored
 from builder.build import Builder
 from plugin import PluginHandler
 from hooks import add_subscriber, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
+import cli
 
 config = yaml.safe_load(open('config.yml'))
 
 argparser = argparse.ArgumentParser()
 argparser.add_argument('--force_rebuild', help='Force rebuild of all files, despite of any changes', action='store_true')
+argparser.add_argument('--new_page', help='Generate a blank boilerplate page', type=str, required=False)
 
 installed_plugins = []
 
@@ -28,7 +30,12 @@ if __name__ == '__main__':
 
     add_subscriber(plugin_handler, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD)
 
-    files, ok = log.load_raw_entries(os.path.join('test'))
+    # Create file(s) if command line options given
+    if args.new_page:
+        cli.cli_new_page(args.new_page)
+        exit()
+
+    files, ok = log.load_raw_entries(os.path.join(config['input']['input_dir']))
     # TODO: path to the files should be a command line argument with default in config
 
     # this would return false for ok if any file is not a pair (= missing either a meta or a page file)

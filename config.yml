@@ -5,10 +5,16 @@ log:
 files:
   meta_types: ['json']
   page_types: ['md']
+  default_meta_type: 'json'
+  default_page_type: 'md'
 
 templates:
-  path: 'test/templates'
+  path: 'test/templates/'
   build_nav: true
+  default_template: 'default.html'
+
+input:
+  input_dir: 'test/'
 
 output:
   file_format: 'html'
@@ -16,10 +22,10 @@ output:
   minify_html: true
 
 processing:
-  use_nltk: true
+  use_nltk: false
   min_word_length: 2
   keyword_extraction: 'True'
   summary_generation: 'True'
 
 plugins:
-  path: 'plugins/'
+  path: 'plugins'

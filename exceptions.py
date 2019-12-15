@@ -28,3 +28,7 @@ class LoaderNoSuitableLoaderError(Exception):
 
 class BuildNoBuildFilesError(Exception):
     pass
+
+
+class WriterNoSuitableWriterError(Exception):
+    pass

@@ -1,6 +1,8 @@
 import io
 import os
 import hashlib
+import re
+import unicodedata
 
 
 def file_get_extension(file, strip_dot=False):
@@ -34,3 +36,18 @@ def safe_create_dir(file):
     if not os.path.exists(dir_name):
         os.makedirs(dir_name, exist_ok=True)
 
+
+# Taken from https://github.com/django/django/blob/master/django/utils/text.py
+def slugify(value, allow_unicode=False):
+    """
+    Convert to ASCII if 'allow_unicode' is False. Convert spaces to hyphens.
+    Remove characters that aren't alphanumerics, underscores, or hyphens.
+    Convert to lowercase. Also strip leading and trailing whitespace.
+    """
+    value = str(value)
+    if allow_unicode:
+        value = unicodedata.normalize('NFKC', value)
+    else:
+        value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
+    value = re.sub(r'[^\w\s-]', '', value).strip().lower()
+    return re.sub(r'[-\s]+', '-', value)
