@@ -6,7 +6,7 @@ from termcolor import colored
 import cli
 from builder.build import Builder
 from hooks import add_subscriber, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
-from log.log import Log
+from log import log
 from plugin import PluginHandler
 
 config = yaml.safe_load(open('config.yml'))
@@ -22,6 +22,7 @@ parser_activate.add_argument('page', nargs='+', help='Activate specified page')
 
 installed_plugins = []
 
+
 if __name__ == '__main__':
     # Read command line options
     args = argparser.parse_args()
@@ -31,9 +32,13 @@ if __name__ == '__main__':
     plugin_handler = PluginHandler(config['plugins']['path'])
     plugin_handler.install_plugins()
 
-    log = Log()
-
     add_subscriber(plugin_handler, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD)
+
+    # Preload the files
+    files, ok = log.load_raw_entries(os.path.join(config['input']['input_dir']))
+    if not ok:
+        print(colored('BUILD ERROR', 'red'), 'Build time: {0}'.format(time.time() - build_time_start))
+        exit()
 
     # CLI: Create file(s) or structures
     if args.command == 'new':
@@ -43,17 +48,19 @@ if __name__ == '__main__':
             except IndexError:
                 print(colored('Failed to generate new page, please provide name!', 'red'))
         exit()
+    elif args.command == 'activate':
+        if args.page:
+            try:
+                entry = files[args.page[0]]
+                cli.cli_activate_page(entry)
+            except KeyError:
+                print(colored('Could not activate / find page', 'red'), args.page[0])
+                exit()
 
-    files, ok = log.load_raw_entries(os.path.join(config['input']['input_dir']))
+    changed_files, needs_rebuild_from_files = log.convert_raw_entries(files)
 
     # this would return false for ok if any file is not a pair (= missing either a meta or a page file)
     print('File integrity: ', colored('OK ', 'green') if ok else colored('Error!', 'red'))
-
-    if not ok:
-        print(colored('BUILD ERROR', 'red'), 'Build time: {0}'.format(time.time() - build_time_start))
-        exit()
-
-    changed_files, needs_rebuild_from_files = log.convert_raw_entries(files)
 
     # Force rebuild either by files or by command line option --force-rebuild
     needs_rebuild = args.force_rebuild or needs_rebuild_from_files
