@@ -1,19 +1,24 @@
+import argparse
 import os
 import time
 import yaml
-import argparse
-from log.log import Log
 from termcolor import colored
-from builder.build import Builder
-from plugin import PluginHandler
-from hooks import add_subscriber, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
 import cli
+from builder.build import Builder
+from hooks import add_subscriber, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
+from log.log import Log
+from plugin import PluginHandler
 
 config = yaml.safe_load(open('config.yml'))
 
+# Create all supported command line options and commands
 argparser = argparse.ArgumentParser()
+subparser = argparser.add_subparsers(dest='command')
 argparser.add_argument('--force_rebuild', help='Force rebuild of all files, despite of any changes', action='store_true')
-argparser.add_argument('--new_page', help='Generate a blank boilerplate page', type=str, required=False)
+parser_new = subparser.add_parser('new')
+parser_activate = subparser.add_parser('activate')
+parser_new.add_argument('page', nargs='+', help='Generate a new page with the specified name')
+parser_activate.add_argument('page', nargs='+', help='Activate specified page')
 
 installed_plugins = []
 
@@ -30,13 +35,16 @@ if __name__ == '__main__':
 
     add_subscriber(plugin_handler, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD)
 
-    # Create file(s) if command line options given
-    if args.new_page:
-        cli.cli_new_page(args.new_page)
+    # CLI: Create file(s) or structures
+    if args.command == 'new':
+        if args.page:
+            try:
+                cli.cli_new_page(args.page[1])
+            except IndexError:
+                print(colored('Failed to generate new page, please provide name!', 'red'))
         exit()
 
     files, ok = log.load_raw_entries(os.path.join(config['input']['input_dir']))
-    # TODO: path to the files should be a command line argument with default in config
 
     # this would return false for ok if any file is not a pair (= missing either a meta or a page file)
     print('File integrity: ', colored('OK ', 'green') if ok else colored('Error!', 'red'))
