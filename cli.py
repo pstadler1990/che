@@ -1,21 +1,25 @@
 import io
 import os
-import yaml
+
 from termcolor import colored
 
 import helpers
+from configuration import config
+from log import log
 from writer.writers import find_writer_for_ext
 
-config = yaml.safe_load(open('config.yml'))
+input_dir = os.path.join(config['input']['input_dir'])
+default_meta_type = config['files']['default_meta_type']
+default_page_type = config['files']['default_page_type']
 
 
 def cli_new_page(page_name):
     """
     Generates a new page with given name using the defined default types (config.yaml)
     """
-    input_dir = os.path.join(config['input']['input_dir'])
-    default_meta_type = config['files']['default_meta_type']
-    default_page_type = config['files']['default_page_type']
+    if log.find(page_name):
+        print(colored('Page already exists, skipping', 'grey'))
+        return
 
     file_names = {
         'meta': os.path.join(input_dir, page_name + os.extsep + default_meta_type),
@@ -45,3 +49,9 @@ def cli_new_page(page_name):
     # Write page_converted to actual file
     with io.open(file_names['page'], 'w') as page_file:
         page_file.write(page_converted)
+
+
+def cli_activate_page(page, active=True):
+    if page['meta']['loaded']:
+        page['meta']['loaded']['status'] = 'published' if active else 'draft'
+        helpers.write_disk_meta(page['meta']['loaded'])

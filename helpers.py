@@ -1,8 +1,15 @@
+import hashlib
 import io
 import os
-import hashlib
 import re
 import unicodedata
+
+from configuration import config
+from writer.writers import find_writer_for_ext
+
+input_dir = os.path.join(config['input']['input_dir'])
+default_meta_type = config['files']['default_meta_type']
+default_page_type = config['files']['default_page_type']
 
 
 def file_get_extension(file, strip_dot=False):
@@ -51,3 +58,16 @@ def slugify(value, allow_unicode=False):
         value = unicodedata.normalize('NFKD', value).encode('ascii', 'ignore').decode('ascii')
     value = re.sub(r'[^\w\s-]', '', value).strip().lower()
     return re.sub(r'[-\s]+', '-', value)
+
+
+def write_disk_meta(meta_dict):
+    """
+    Write meta_converted to actual file
+    """
+    outfile_path = os.path.join(input_dir, meta_dict['slug'] + '.{type}'.format(type=default_meta_type))
+
+    writer_meta = find_writer_for_ext(default_meta_type)()
+    meta_converted = writer_meta.write(meta_dict)
+
+    with io.open(outfile_path, 'w') as meta_file:
+        meta_file.write(meta_converted)
