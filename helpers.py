@@ -1,15 +1,9 @@
 import hashlib
 import io
-import os
 import re
 import unicodedata
-
-from configuration import config
+from configuration import *
 from writer.writers import find_writer_for_ext
-
-input_dir = os.path.join(config['input']['input_dir'])
-default_meta_type = config['files']['default_meta_type']
-default_page_type = config['files']['default_page_type']
 
 
 def file_get_extension(file, strip_dot=False):
