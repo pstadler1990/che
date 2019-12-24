@@ -1,7 +1,5 @@
-import yaml
 from jinja2 import Environment, FileSystemLoader, select_autoescape, BaseLoader
-
-config = yaml.safe_load(open('config.yml'))
+from configuration import config
 
 additional_templates = []
 env = None

@@ -1,4 +1,3 @@
-from base64 import encodebytes
 from datetime import datetime
 from exceptions import LogEntryNotInLogError
 

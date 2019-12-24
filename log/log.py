@@ -3,9 +3,7 @@ import json
 import os
 import uuid
 from datetime import datetime
-
 from termcolor import colored
-
 from configuration import config
 from exceptions import *
 from helpers import file_get_extension, contents_get_hash_md5, safe_create_dir
