@@ -1,23 +1,23 @@
 import io
-import os
 import json
+import os
 import uuid
-import yaml
-from hooks import emit_hook, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
-from log.entry import Entry
 from datetime import datetime
-from termcolor import colored
-from helpers import file_get_extension, contents_get_hash_md5, safe_create_dir
-from loader.loaders import find_loader_for_ext
-from exceptions import *
 
-config = yaml.safe_load(open('config.yml'))
+from termcolor import colored
+
+from configuration import config
+from exceptions import *
+from helpers import file_get_extension, contents_get_hash_md5, safe_create_dir
+from hooks import emit_hook, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
+from loader.loaders import find_loader_for_ext
+from log.entry import Entry
+
 log_file_path = os.path.join(config['log']['output_dir'], config['log']['file_name'])
 entries = []
 
 # Initially load entries into the log
 safe_create_dir(config['log']['output_dir'])
-print('CREATING THE LOG')
 with io.open(log_file_path, 'r', encoding='utf-8') as log_file_open:
     try:
         entries = []

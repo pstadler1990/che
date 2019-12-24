@@ -8,8 +8,7 @@ from builder.build import Builder
 from hooks import add_subscriber, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
 from log import log
 from plugin import PluginHandler
-
-config = yaml.safe_load(open('config.yml'))
+from configuration import config
 
 # Create all supported command line options and commands
 argparser = argparse.ArgumentParser()
@@ -17,8 +16,10 @@ subparser = argparser.add_subparsers(dest='command')
 argparser.add_argument('--force_rebuild', help='Force rebuild of all files, despite of any changes', action='store_true')
 parser_new = subparser.add_parser('new')
 parser_activate = subparser.add_parser('activate')
+parser_deactivate = subparser.add_parser('deactivate')
 parser_new.add_argument('page', nargs='+', help='Generate a new page with the specified name')
 parser_activate.add_argument('page', nargs='+', help='Activate specified page')
+parser_deactivate.add_argument('page', nargs='+', help='Deactivate specified page')
 
 installed_plugins = []
 
@@ -26,9 +27,9 @@ installed_plugins = []
 if __name__ == '__main__':
     # Read command line options
     args = argparser.parse_args()
-
     build_time_start = time.time()
 
+    # Activate plugins and emit hooks
     plugin_handler = PluginHandler(config['plugins']['path'])
     plugin_handler.install_plugins()
 
@@ -48,14 +49,16 @@ if __name__ == '__main__':
             except IndexError:
                 print(colored('Failed to generate new page, please provide name!', 'red'))
         exit()
-    elif args.command == 'activate':
+    elif args.command in ['activate', 'deactivate']:
         if args.page:
             try:
                 entry = files[args.page[0]]
-                cli.cli_activate_page(entry)
+                active = args.command == 'activate'
+                cli.cli_activate_page(entry, active)
+                print(colored('Page status of "{page}" has changed.'.format(page=args.page[0]), 'grey'))
             except KeyError:
                 print(colored('Could not activate / find page', 'red'), args.page[0])
-                exit()
+        exit()
 
     changed_files, needs_rebuild_from_files = log.convert_raw_entries(files)
 

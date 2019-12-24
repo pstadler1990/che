@@ -1,13 +1,13 @@
 import io
 import os
-import yaml
+
 from termcolor import colored
 
 import helpers
+from configuration import config
 from log import log
 from writer.writers import find_writer_for_ext
 
-config = yaml.safe_load(open('config.yml'))
 input_dir = os.path.join(config['input']['input_dir'])
 default_meta_type = config['files']['default_meta_type']
 default_page_type = config['files']['default_page_type']
@@ -54,12 +54,4 @@ def cli_new_page(page_name):
 def cli_activate_page(page, active=True):
     if page['meta']['loaded']:
         page['meta']['loaded']['status'] = 'published' if active else 'draft'
-
-        # Meta
-        writer_meta = find_writer_for_ext(default_meta_type)()
-        meta_converted = writer_meta.write(page['meta'])
-        # Write meta_converted to actual file
-        with io.open(file_names['meta'], 'w') as meta_file:
-            meta_file.write(meta_converted)
-
-        # TODO: Put the write stuff in functions!
+        helpers.write_disk_meta(page['meta']['loaded'])
