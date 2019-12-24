@@ -1,16 +1,9 @@
 import io
-import os
-
 from termcolor import colored
-
 import helpers
-from configuration import config
+from configuration import *
 from log import log
 from writer.writers import find_writer_for_ext
-
-input_dir = os.path.join(config['input']['input_dir'])
-default_meta_type = config['files']['default_meta_type']
-default_page_type = config['files']['default_page_type']
 
 
 def cli_new_page(page_name):

@@ -1,14 +1,13 @@
 import argparse
 import os
 import time
-import yaml
 from termcolor import colored
 import cli
 from builder.build import Builder
+from configuration import config
 from hooks import add_subscriber, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
 from log import log
 from plugin import PluginHandler
-from configuration import config
 
 # Create all supported command line options and commands
 argparser = argparse.ArgumentParser()
