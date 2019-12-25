@@ -17,6 +17,7 @@ def cli_init():
     by generating all required files, such as the log and the config
     """
     CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config_test.yml')
+    STORE_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'store', 'log.json')
 
     available_meta = []
     available_page = []
@@ -38,6 +39,23 @@ def cli_init():
         available_page.append({'name': page})
 
     questions = [
+        # Overwrite config if existing?
+        {
+            'type': 'confirm',
+            'name': 'overwrite_config',
+            'message': 'There\'s already a configuration file - do you want to overwrite it?',
+            'when': lambda a: True
+        },
+        # If previous answer was No, then ask for new config file name
+        {
+            'type': 'input',
+            'name': 'overwrite_config_name',
+            'message': 'New config name',
+            'default': 'config2.yml',
+            'validate': lambda text: os.path.exists(
+                os.path.join(os.path.dirname(os.path.realpath(__file__)), text)) is False,
+            'when': lambda a: a['overwrite_config'] is False
+        },
         # Project name
         {
             'type': 'input',
@@ -64,7 +82,7 @@ def cli_init():
             'name': 'template_path',
             'message': 'Template path',
             'validate': lambda text: os.path.isabs(text),
-            'default': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates' + os.sep,)
+            'default': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates' + os.sep, )
         },
         # default template
         {
@@ -112,6 +130,23 @@ def cli_init():
             'validate': lambda text: os.path.isabs(text),
             'default': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'store' + os.sep)
         },
+        # Overwrite store if existing?
+        {
+            'type': 'confirm',
+            'name': 'overwrite_store',
+            'message': 'There\'s already a store file - do you want to overwrite it?',
+            'when': lambda a: os.path.exists(a['store_path'])
+        },
+        # If previous answer was No, then ask for new store file name
+        {
+            'type': 'input',
+            'name': 'overwrite_store_name',
+            'message': 'New store name',
+            'default': 'log2.json',
+            'validate': lambda text: os.path.exists(
+                os.path.join(os.path.dirname(os.path.realpath(__file__)), text)) is False,
+            'when': lambda a: a['overwrite_store'] is False
+        },
     ]
     answers = prompt(questions)
 
@@ -130,8 +165,24 @@ def cli_init():
     filled_config['plugins']['path'] = answers['plugin_path']
     filled_config['log']['output_dir'] = answers['store_path']
 
-    with io.open(CONFIG_PATH, 'w+') as config_file:
+    store_output_path = STORE_PATH
+    if not answers['overwrite_store'] and answers['overwrite_store_name']:
+        # Change store file because of already existing default
+        store_output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), answers['store_path'], answers['overwrite_store_name'])
+        filled_config['log']['file_name'] = answers['overwrite_store_name']
+
+    config_output_path = CONFIG_PATH
+    if not answers['overwrite_config'] and answers['overwrite_config_name']:
+        # Change output file because of already existing default
+        config_output_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), answers['overwrite_config_name'])
+
+    with io.open(config_output_path, 'w+') as config_file:
         yaml.safe_dump(filled_config, config_file)
+
+    with io.open(store_output_path, 'w+') as log_file:
+        log_file.write('[{}]')
+
+    print(colored('Your new site has been initialized! You can now run che to build it.', 'green'))
 
 
 def cli_new_page(page_name):
