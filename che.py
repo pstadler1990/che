@@ -14,6 +14,7 @@ argparser = argparse.ArgumentParser()
 subparser = argparser.add_subparsers(dest='command')
 argparser.add_argument('--force_rebuild', help='Force rebuild of all files, despite of any changes', action='store_true')
 parser_new = subparser.add_parser('new')
+parser_init = subparser.add_parser('init')
 parser_activate = subparser.add_parser('activate')
 parser_deactivate = subparser.add_parser('deactivate')
 parser_new.add_argument('page', nargs='+', help='Generate a new page with the specified name')
@@ -41,7 +42,10 @@ if __name__ == '__main__':
         exit()
 
     # CLI: Create file(s) or structures
-    if args.command == 'new':
+    if args.command == 'init':
+        cli.cli_init()
+        exit()
+    elif args.command == 'new':
         if args.page:
             try:
                 cli.cli_new_page(args.page[1])
