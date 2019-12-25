@@ -1,4 +1,6 @@
 import io
+from copy import deepcopy
+
 from PyInquirer import prompt
 from termcolor import colored
 import helpers
@@ -14,14 +16,16 @@ def cli_init():
     Initializes a brand new website or blog project
     by generating all required files, such as the log and the config
     """
+    CONFIG_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config_test.yml')
+
     available_meta = []
     available_page = []
 
     # Convert available loaders
-    meta_loaders = [','.join(k['ext']) for k in filter(lambda e: e['type'] == 'meta', loaders.available_loaders)]
-    page_loaders = [','.join(k['ext']) for k in filter(lambda e: e['type'] == 'page', loaders.available_loaders)]
-    meta_writers = [','.join(k['ext']) for k in filter(lambda e: e['type'] == 'meta', writers.available_writers)]
-    page_writers = [','.join(k['ext']) for k in filter(lambda e: e['type'] == 'page', writers.available_writers)]
+    meta_loaders = [k['ext'] for k in filter(lambda e: e['type'] == 'meta', loaders.available_loaders)]
+    page_loaders = [k['ext'] for k in filter(lambda e: e['type'] == 'page', loaders.available_loaders)]
+    meta_writers = [k['ext'] for k in filter(lambda e: e['type'] == 'meta', writers.available_writers)]
+    page_writers = [k['ext'] for k in filter(lambda e: e['type'] == 'page', writers.available_writers)]
 
     # Intersect loaders and writers
     che_meta = list(set(meta_loaders) & set(meta_writers))
@@ -54,28 +58,80 @@ def cli_init():
             'message': 'Select wanted file type support for PAGE data',
             'choices': available_page
         },
-        # 3. Template path
+        # Template path
         {
             'type': 'input',
             'name': 'template_path',
-            'message': 'Enter template path',
+            'message': 'Template path',
             'validate': lambda text: os.path.isabs(text),
             'default': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'templates' + os.sep,)
-        }
+        },
+        # default template
+        {
+            'type': 'input',
+            'name': 'default_template',
+            'message': 'Default template (i.e. default.html)',
+            'validate': lambda text: len(text) > 0 and str(text).find('.') > 0,
+            'default': 'default.html'
+        },
+        # Use page navigation
+        {
+            'type': 'confirm',
+            'name': 'build_navigation',
+            'message': 'Build navigation from files?',
+        },
+        # Input dir for raw files (page and meta)
+        {
+            'type': 'input',
+            'name': 'input_path',
+            'message': 'Path for input files (meta and page files)',
+            'validate': lambda text: os.path.isabs(text),
+            'default': os.path.join(os.path.dirname(os.path.realpath(__file__)) + os.sep)
+        },
+        # Output dir
+        {
+            'type': 'input',
+            'name': 'output_path',
+            'message': 'Path for output of generated html files',
+            'validate': lambda text: os.path.isabs(text),
+            'default': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dist' + os.sep)
+        },
+        # Plugin path
+        {
+            'type': 'input',
+            'name': 'plugin_path',
+            'message': 'Path for plugins',
+            'validate': lambda text: os.path.isabs(text),
+            'default': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'plugins' + os.sep)
+        },
+        # Store path
+        {
+            'type': 'input',
+            'name': 'store_path',
+            'message': 'Path for the local store database (store)',
+            'validate': lambda text: os.path.isabs(text),
+            'default': os.path.join(os.path.dirname(os.path.realpath(__file__)), 'store' + os.sep)
+        },
     ]
-
-
-
-
-    # 4. default template
-    # 5. Use page navigation
-    # 6. Input dir for raw files (page and meta)
-    # 7. Output file formats (based on ...?)
-    # 8. Output dir
-    # 9. Plugin path
-    # Create temporary config and log files (config_test.yml and log_test.json)
     answers = prompt(questions)
-    print(answers)
+
+    # Copy the answers into a new configuration file
+    filled_config = deepcopy(blank_config)
+    filled_config['project']['name'] = answers['project_name']
+    filled_config['files']['meta_types'] = answers['supported_meta']
+    filled_config['files']['page_types'] = answers['supported_page']
+    filled_config['files']['default_meta_type'] = answers['supported_meta'][0]
+    filled_config['files']['default_page_type'] = answers['supported_page'][0]
+    filled_config['templates']['path'] = answers['template_path']
+    filled_config['templates']['default_template'] = answers['default_template']
+    filled_config['templates']['build_nav'] = answers['build_navigation']
+    filled_config['input']['input_dir'] = answers['input_path']
+    filled_config['output']['output_dir'] = answers['output_path']
+    filled_config['plugins']['path'] = answers['plugin_path']
+    filled_config['log']['output_dir'] = answers['store_path']
+
+    with io.open(CONFIG_PATH, 'w+') as config_file:
+        yaml.safe_dump(filled_config, config_file)
 
 
 def cli_new_page(page_name):

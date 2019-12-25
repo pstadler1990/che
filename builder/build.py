@@ -1,9 +1,7 @@
 import io
 import os
-
 import htmlmin
 from termcolor import colored
-
 from builder.template import render_template
 from configuration import config
 from exceptions import BuildNoBuildFilesError
@@ -83,7 +81,8 @@ class Builder:
 
             output_html = render_template(page_obj['meta']['loaded']['template'], page={
                 'title': page_obj['meta']['loaded']['title'],
-                'content': page_obj['page']['loaded']
+                'content': page_obj['page']['loaded'],
+                'website_name': config['project']['name']
             }, nav=self.nav_entries)
 
             print(colored('Generated output file', 'green'), page_obj['meta']['loaded']['slug'])
