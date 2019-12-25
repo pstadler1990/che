@@ -4,10 +4,12 @@ from loader.page_markdown import PageLoaderMarkdown
 
 available_loaders = [
     {
+        'type': 'meta',
         'ext': ['js', 'json'],
         'loader': MetaLoaderJSON
     },
     {
+        'type': 'page',
         'ext': ['md'],
         'loader': PageLoaderMarkdown
     }
