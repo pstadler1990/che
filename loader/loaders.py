@@ -5,12 +5,12 @@ from loader.page_markdown import PageLoaderMarkdown
 available_loaders = [
     {
         'type': 'meta',
-        'ext': ['js', 'json'],
+        'ext': 'json',
         'loader': MetaLoaderJSON
     },
     {
         'type': 'page',
-        'ext': ['md'],
+        'ext': 'md',
         'loader': PageLoaderMarkdown
     }
 ]

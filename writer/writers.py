@@ -5,12 +5,12 @@ from writer.page_markdown import PageWriterMarkdown
 available_writers = [
     {
         'type': 'meta',
-        'ext': ['js', 'json'],
+        'ext': 'json',
         'writer': MetaWriterJSON
     },
     {
         'type': 'page',
-        'ext': ['md'],
+        'ext': 'md',
         'writer': PageWriterMarkdown
     }
 ]
