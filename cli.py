@@ -1,6 +1,5 @@
 import io
 from copy import deepcopy
-
 from PyInquirer import prompt
 from termcolor import colored
 import helpers
@@ -188,12 +187,10 @@ def cli_init():
 
     # Create demo files if specified
     if answers['create_demo']:
-        # TODO: Add some cooler features and demo sites in the future
-        cli_new_page(page_name='Home', content='This is the homepage. *Start by adding some cool content!*')
-        cli_new_page(page_name='About us', content='We are some cool people and this is our website - created with **che**')
-        cli_new_page(page_name='Example Page', content='Lorem ipsum')
+        # TODO: Currently not possible (need to reload log / config first!)
+        pass
 
-    print(colored('Your new site has been initialized! You can now run che to build it.', 'green'))
+    print(colored('Your new site has been initialized! You can now run che new page|post to add content.', 'green'))
 
 
 def cli_new_page(page_name, content='Add your content here'):
@@ -204,18 +201,20 @@ def cli_new_page(page_name, content='Add your content here'):
         print(colored('Page already exists, skipping', 'grey'))
         return
 
+    slugified_page_name = helpers.slugify(page_name)
+
     file_names = {
-        'meta': os.path.join(input_dir, page_name + os.extsep + default_meta_type),
-        'page': os.path.join(input_dir, page_name + os.extsep + default_page_type),
+        'meta': os.path.join(input_dir, slugified_page_name + os.extsep + default_meta_type),
+        'page': os.path.join(input_dir, slugified_page_name + os.extsep + default_page_type),
     }
 
-    print(colored('Creating page', 'green'), colored(page_name, 'blue'))
+    print(colored('Creating page', 'green'), colored(slugified_page_name, 'blue'))
 
     # Meta
     writer_meta = find_writer_for_ext(default_meta_type)()
     boilerplate_meta = {
         'title': page_name,
-        'slug': helpers.slugify(page_name),
+        'slug': slugified_page_name,
         'template': config['templates']['default_template'],
         'visibility': 'hidden',
         'status': 'draft'

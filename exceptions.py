@@ -32,3 +32,7 @@ class BuildNoBuildFilesError(Exception):
 
 class WriterNoSuitableWriterError(Exception):
     pass
+
+
+class ConfigNotFoundError(Exception):
+    pass

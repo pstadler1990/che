@@ -4,7 +4,13 @@ import time
 from termcolor import colored
 import cli
 from builder.build import Builder
-from configuration import config
+from exceptions import ConfigNotFoundError
+
+try:
+    from configuration import config
+    config_found = True
+except ImportError:
+    config_found = False
 from hooks import add_subscriber, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
 from log import log
 from plugin import PluginHandler
@@ -30,17 +36,22 @@ if __name__ == '__main__':
     build_time_start = time.time()
 
     # Activate plugins and emit hooks
-    plugin_handler = PluginHandler(config['plugins']['path'])
-    plugin_handler.install_plugins()
+    try:
+        plugin_handler = PluginHandler(config['plugins']['path'])
+        plugin_handler.install_plugins()
 
-    add_subscriber(plugin_handler, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD)
+        add_subscriber(plugin_handler, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD)
 
-    # Preload the files
-    files, ok = log.load_raw_entries(os.path.join(config['input']['input_dir']))
-    if not ok:
-        # print(colored('BUILD ERROR', 'red'), 'Build time: {0}'.format(time.time() - build_time_start))
-        # exit()
-        pass
+        # Preload the files
+        files, ok = log.load_raw_entries(os.path.join(config['input']['input_dir']))
+        if not ok:
+            # print(colored('BUILD ERROR', 'red'), 'Build time: {0}'.format(time.time() - build_time_start))
+            # exit()
+            pass
+    except NameError:
+        # No config found, allow only a few base commands like init
+        if not args.command or args.command != 'init':
+            raise ConfigNotFoundError('No config given. Please use che init to create a new website')
 
     # CLI: Create file(s) or structures
     if args.command == 'init':

@@ -1,5 +1,8 @@
 from jinja2 import Environment, FileSystemLoader, select_autoescape, BaseLoader
-from configuration import config
+try:
+    from configuration import config
+except ImportError:
+    pass
 
 additional_templates = []
 env = None

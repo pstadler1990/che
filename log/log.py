@@ -4,27 +4,33 @@ import os
 import uuid
 from datetime import datetime
 from termcolor import colored
-from configuration import config
+try:
+    from configuration import config
+except ImportError:
+    pass
 from exceptions import *
 from helpers import file_get_extension, contents_get_hash_md5, safe_create_dir
 from hooks import emit_hook, HOOK_BEFORE_LOAD, HOOK_AFTER_LOAD
 from loader.loaders import find_loader_for_ext
 from log.entry import Entry
 
-log_file_path = os.path.join(config['log']['output_dir'], config['log']['file_name'])
-entries = []
+try:
+    log_file_path = os.path.join(config['log']['output_dir'], config['log']['file_name'])
+    entries = []
 
-# Initially load entries into the log
-safe_create_dir(config['log']['output_dir'])
-with io.open(log_file_path, 'r', encoding='utf-8') as log_file_open:
-    try:
-        entries = []
-        tmp_entries = json.load(log_file_open)
-        for t in tmp_entries:
-            new_entry = Entry(filename=None, field_initializer=t)
-            entries.append(new_entry)
-    except json.decoder.JSONDecodeError:
-        entries = []
+    # Initially load entries into the log
+    safe_create_dir(config['log']['output_dir'])
+    with io.open(log_file_path, 'r', encoding='utf-8') as log_file_open:
+        try:
+            entries = []
+            tmp_entries = json.load(log_file_open)
+            for t in tmp_entries:
+                new_entry = Entry(filename=None, field_initializer=t)
+                entries.append(new_entry)
+        except json.decoder.JSONDecodeError:
+            entries = []
+except NameError:
+    pass
 
 
 def _file_is_meta(ext):

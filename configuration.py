@@ -1,11 +1,16 @@
 import os
 import yaml
+from termcolor import colored
 
-config = yaml.safe_load(open('config_test.yml'))
-
-input_dir = os.path.join(config['input']['input_dir'])
-default_meta_type = config['files']['default_meta_type']
-default_page_type = config['files']['default_page_type']
+try:
+    config = yaml.safe_load(open('config2.yml'))
+    input_dir = os.path.join(config['input']['input_dir'])
+    default_meta_type = config['files']['default_meta_type']
+    default_page_type = config['files']['default_page_type']
+except FileNotFoundError:
+    print(colored('Specified configuration file not found. Please change or use', 'red'),
+          colored('che init', 'green'),
+          colored('to generate a new configuration', 'red'))
 
 # Blank configuration to be copied for generating files
 blank_config = {

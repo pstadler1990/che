@@ -3,7 +3,10 @@ import os
 import htmlmin
 from termcolor import colored
 from builder.template import render_template
-from configuration import config
+try:
+    from configuration import config
+except ImportError:
+    pass
 from exceptions import BuildNoBuildFilesError
 from helpers import safe_create_dir
 from nlp import nlp_process
