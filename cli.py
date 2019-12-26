@@ -143,10 +143,14 @@ def cli_init():
             'name': 'overwrite_store_name',
             'message': 'New store name',
             'default': 'log2.json',
-            'validate': lambda text: os.path.exists(
-                os.path.join(os.path.dirname(os.path.realpath(__file__)), text)) is False,
             'when': lambda a: a['overwrite_store'] is False
         },
+        # Create demo files?
+        {
+            'type': 'confirm',
+            'name': 'create_demo',
+            'message': 'Do you want to create some example files (demo project)?'
+        }
     ]
     answers = prompt(questions)
 
@@ -182,10 +186,17 @@ def cli_init():
     with io.open(store_output_path, 'w+') as log_file:
         log_file.write('[{}]')
 
+    # Create demo files if specified
+    if answers['create_demo']:
+        # TODO: Add some cooler features and demo sites in the future
+        cli_new_page(page_name='Home', content='This is the homepage. *Start by adding some cool content!*')
+        cli_new_page(page_name='About us', content='We are some cool people and this is our website - created with **che**')
+        cli_new_page(page_name='Example Page', content='Lorem ipsum')
+
     print(colored('Your new site has been initialized! You can now run che to build it.', 'green'))
 
 
-def cli_new_page(page_name):
+def cli_new_page(page_name, content='Add your content here'):
     """
     Generates a new page with given name using the defined default types (config.yaml)
     """
@@ -217,7 +228,7 @@ def cli_new_page(page_name):
 
     # Page
     writer_page = find_writer_for_ext(default_page_type)()
-    page_converted = writer_page.write("<h1>{0}</h1><p>Add your content here</p>".format(page_name))
+    page_converted = writer_page.write("<h1>{name}</h1><p>{content}</p>".format(name=page_name, content=content))
     # Write page_converted to actual file
     with io.open(file_names['page'], 'w') as page_file:
         page_file.write(page_converted)

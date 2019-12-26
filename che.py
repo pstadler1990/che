@@ -38,8 +38,9 @@ if __name__ == '__main__':
     # Preload the files
     files, ok = log.load_raw_entries(os.path.join(config['input']['input_dir']))
     if not ok:
-        print(colored('BUILD ERROR', 'red'), 'Build time: {0}'.format(time.time() - build_time_start))
-        exit()
+        # print(colored('BUILD ERROR', 'red'), 'Build time: {0}'.format(time.time() - build_time_start))
+        # exit()
+        pass
 
     # CLI: Create file(s) or structures
     if args.command == 'init':
