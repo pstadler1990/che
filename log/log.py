@@ -53,7 +53,7 @@ def load_raw_entries(path):
         ...
     """
     if not os.path.isdir(path):
-        raise LogEntriesNotADirectoryError('Given path is not a directory')
+        safe_create_dir(path)
 
     found_files = {}
 
